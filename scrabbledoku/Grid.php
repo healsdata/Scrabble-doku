@@ -34,23 +34,51 @@ class Grid
 	}
 	
 	/**
-	 * @param integer $row
-	 * @param integer $col
+	 * @param string $cellName
+	 * @return integer
+	 */
+	private function _translateCellNameToRow($cellName)
+	{
+		$numericPart = preg_replace("/[^0-9]/", "",  $cellName);
+		return $numericPart - 1;
+	}
+	
+	/**
+	 * @param string $cellName
+	 * @return integer
+	 */
+	private function _translateCellNameToColumn($cellName)
+	{
+		$letterPart = preg_replace("/[^a-zA-Z]/", "",  $cellName);
+		$letterPart = strtoupper($letterPart);
+		foreach (range('A', 'Z') as $column => $letter) {
+			if ($letterPart == $letter) {
+				return $column;
+			}
+		}
+	}	
+	
+	/**
+	 * @param string $cellName
 	 * @param string $value
 	 * @return void
 	 */
-	public function setValue($row, $col, $value)
+	public function setValue($cellName, $value)
 	{
+		$row = $this->_translateCellNameToRow($cellName);
+		$col = $this->_translateCellNameToColumn($cellName);
+		
 		$this->_cells[$row][$col] = $value;
 	}
 	
 	/**
-	 * @param integer $row
-	 * @param integer $col
+	 * @param string $cellName
 	 * @return string
 	 */
-	public function getValue($row, $col)
+	public function getValue($cellName)
 	{
+		$row = $this->_translateCellNameToRow($cellName);
+		$col = $this->_translateCellNameToColumn($cellName);		
 		return $this->_cells[$row][$col]; 
 	}
 	

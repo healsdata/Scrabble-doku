@@ -25,25 +25,26 @@ class GridTest extends PHPUnit_Framework_TestCase
 	{
 		$grid = $this->_givenAGridForXCharacters(7);
 	
-		$row = 4;
-		$col = 3;
-		$value = 'A';
-		$grid->setValue($row, $col, $value);
+		$grid->setValue('A1', 'C');
+		$grid->setValue('D5', 'F');
+		$grid->setValue('G7', 'B');
 		
 		$cells = $grid->getCells();
 		
-		$this->assertEquals($value, $cells[$row][$col]);		
+		$this->assertEquals('C', $cells[0][0]);
+		$this->assertEquals('F', $cells[4][3]);
+		$this->assertEquals('B', $cells[6][6]);	
+			
 	}
 
 	public function testRetrievesCorrectValueFromASpecificCell()
 	{
 		$grid = $this->_givenAGridForXCharacters(7);
 		
-		$row = 4;
-		$col = 3;
-		$value = 'A';
-		$grid->setValue($row, $col, $value);
-		$this->assertEquals($value, $grid->getValue($row, $col));		
+		$cell = 'A1';
+		$value = 'C';
+		$grid->setValue($cell, $value);
+		$this->assertEquals($value, $grid->getValue($cell));		
 	}
 	
 	
