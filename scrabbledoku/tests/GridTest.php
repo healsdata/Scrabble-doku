@@ -47,6 +47,14 @@ class GridTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals($value, $grid->getValue($cell));		
 	}
 	
-	
+	public function testFindsShapeForASpecificCell()
+	{
+		$grid = $this->_givenAGridForXCharacters(7);
+		
+		$theShape = array('A1', 'B1', 'A2', 'B2', 'A3', 'A4', 'A5');
+		$grid->addShape($theShape);
+		
+		$this->assertEquals($theShape, $grid->getShapeForCell('A1'));
+	}
 	
 }

@@ -9,6 +9,8 @@ class Grid
 	
 	private $_cells;
 	
+	private $_shapes;
+	
 	public function __construct($numberOfCharacters)
 	{
 		$this->_numberOfCharacters = $numberOfCharacters;
@@ -81,5 +83,19 @@ class Grid
 		$col = $this->_translateCellNameToColumn($cellName);		
 		return $this->_cells[$row][$col]; 
 	}
+	
+	public function addShape($cells)
+	{
+		$this->_shapes[] = $cells;
+	}
+	
+	public function getShapeForCell($cellName)
+	{
+		foreach ($this->_shapes as $key => $cells) {
+			if (in_array($cellName, $cells)) {
+				return $this->_shapes[$key];
+			}
+		}
+	}	
 	
 }
