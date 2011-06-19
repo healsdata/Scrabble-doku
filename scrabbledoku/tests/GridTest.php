@@ -2,52 +2,48 @@
 
 class GridTest extends PHPUnit_Framework_TestCase
 {
-
-	/**
-	 * @var Grid
-	 */
-	private $_grid;
-
-	public function setUp()
+	private function _givenAGridForXCharacters($numberOfCharacters)
 	{
-		$this->_grid = new Grid();
+		return new Grid($numberOfCharacters);
 	}
-
-	public function tearDown()
+	
+	public function testContainsAGridWithTheCorrectRowsAndCols()
 	{
-		unset($this->_grid);
-	}
-
-	public function testContainsASevenBySevenGrid()
-	{
-		$rows = $this->_grid->getCells();
+		$numberOfCharacters = 7;
+		
+		$grid = $this->_givenAGridForXCharacters($numberOfCharacters);
+		$rows = $grid->getCells();
 		$this->assertType('array', $rows);
-		$this->assertEquals(7, sizeof($rows));
+		$this->assertEquals($numberOfCharacters, sizeof($rows));
 		
 		foreach ($rows as $row) {
-			$this->assertEquals(7, sizeof($row));
+			$this->assertEquals($numberOfCharacters, sizeof($row));
 		}
 	}
 
 	public function testSetsAGivenValueToASpecificCell()
 	{
+		$grid = $this->_givenAGridForXCharacters(7);
+	
 		$row = 4;
 		$col = 3;
 		$value = 'A';
-		$this->_grid->setValue($row, $col, $value);
+		$grid->setValue($row, $col, $value);
 		
-		$cells = $this->_grid->getCells();
+		$cells = $grid->getCells();
 		
 		$this->assertEquals($value, $cells[$row][$col]);		
 	}
 
 	public function testRetrievesCorrectValueFromASpecificCell()
 	{
+		$grid = $this->_givenAGridForXCharacters(7);
+		
 		$row = 4;
 		$col = 3;
 		$value = 'A';
-		$this->_grid->setValue($row, $col, $value);
-		$this->assertEquals($value, $this->_grid->getValue($row, $col));		
+		$grid->setValue($row, $col, $value);
+		$this->assertEquals($value, $grid->getValue($row, $col));		
 	}
 	
 	

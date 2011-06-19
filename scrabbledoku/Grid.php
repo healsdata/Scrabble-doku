@@ -2,17 +2,24 @@
 
 class Grid
 {
+	/**
+	 * @var integer
+	 */
+	private $_numberOfCharacters;
+	
 	private $_cells;
 	
-	public function __construct()
+	public function __construct($numberOfCharacters)
 	{
+		$this->_numberOfCharacters = $numberOfCharacters;
+		
 		$this->_cells = array();
 		
-		for ($row = 0; $row < 7; $row++)
+		for ($row = 0; $row < $this->_numberOfCharacters; $row++)
 		{
 			$gridRow = array();
 			
-			for ($col = 0; $col < 7; $col++)
+			for ($col = 0; $col < $this->_numberOfCharacters; $col++)
 			{
 				$gridRow[] = '';
 			}
