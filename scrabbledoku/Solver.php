@@ -3,6 +3,134 @@
 class Solver
 {
 	
+	private function _assignCellsWithOnlyOnePossibility()
+	{
+		foreach ($this->_possibilities as $cellName => $possibilities) {
+			if (sizeof($possibilities) == 1) {
+				$this->_assignValue($cellName, array_shift($possibilities));
+				return true;
+			}
+		}		
+		
+		return false;
+	}
+	
+	private function _assignCellsWhereOnlyOneInGroupHasAPossiblity()
+	{
+		foreach ($this->_possibilities as $cellName => $possibilities) {
+			$onlyInRow = $possibilities;
+			$onlyInCol = $possibilities;
+			$onlyInShape = $possibilities;
+			
+			foreach ($this->_possibilities as $otherCellName => $otherPossibilities) {
+				if ($cellName == $otherCellName) {
+					continue;
+				}
+				
+				if ($this->_isSameRow($cellName, $otherCellName)) {
+					$onlyInRow = array_diff($onlyInRow, $otherPossibilities);
+				}
+				if ($this->_isSameColumn($cellName, $otherCellName)) {
+					$onlyInCol = array_diff($onlyInCol, $otherPossibilities);
+				}
+				if ($this->_isSameShape($cellName, $otherCellName)) {
+					$onlyInShape = array_diff($onlyInShape, $otherPossibilities);
+				}
+				
+			}					
+
+			if (sizeof($onlyInRow) == 1) {
+				$this->_assignValue($cellName, array_shift($onlyInRow));
+				return true;
+			}
+			if (sizeof($onlyInCol) == 1) {
+				$this->_assignValue($cellName, array_shift($onlyInCol));
+				return true;
+			}
+			if (sizeof($onlyInShape) == 1) {
+				$this->_assignValue($cellName, array_shift($onlyInShape));
+				return true;
+			}								
+		}			
+		
+		return false;
+	}		
+	
+	public function _reducePossibilitiesWhereOneValueAppearsInOneRowOrColumnInAShape()
+	{
+		$reducedPossibilities = false;
+		
+		foreach ($this->_grid->getShapes() as $shapeCellNames) {
+			foreach ($this->_puzzle as $value) {
+				$inRows = array();
+				$inCols = array();
+				
+				foreach ($shapeCellNames as $shapeCell) {
+					if (!in_array($value, $this->_possibilities[$shapeCell])) {
+						continue;
+					}
+					
+					$inRows[] = substr($shapeCell, 1, 1);
+					$inCols[] = substr($shapeCell, 0, 1);
+				
+					$inRows = array_unique($inRows);
+					$inCols = array_unique($inCols);
+					
+					if (sizeof($inCols) > 1 && sizeof($inRows) > 1) {
+						continue 2;
+					}								
+				}
+
+				if (sizeof($inCols) == 1) {
+					$col = array_shift($inCols);
+					// Remove from non-shape in column
+					foreach ($shapeCellNames as $shapeCell) {
+						if (substr($shapeCell, 0, 1) == $col) {
+							break;
+						}
+					}
+					
+					foreach ($this->_possibilities as $cellName => $possibilities) {
+						if ($cellName == $shapeCell) {
+							continue;
+						}								
+						if ($this->_isSameColumn($shapeCell, $cellName)
+							&& !$this->_isSameShape($shapeCell, $cellName)
+						) {
+							$this->_removePossibilityFromCell($cellName, $value);		
+							$reducedPossibilities = true;						
+						}
+					}
+				}
+				
+				if (sizeof($inRows) == 1) {
+					$row = array_shift($inRows);
+					// Remove from non-shape in column
+					foreach ($shapeCellNames as $shapeCell) {
+						if (substr($shapeCell, 1, 1) == $row) {
+							break;
+						}
+					}
+					
+					foreach ($this->_possibilities as $cellName => $possibilities) {
+						if ($cellName == $shapeCell) {
+							continue;
+						}								
+						if ($this->_isSameRow($shapeCell, $cellName)
+							&& !$this->_isSameShape($shapeCell, $cellName)
+						) {				
+							$this->_removePossibilityFromCell($cellName, $value);
+							$reducedPossibilities = true;								
+						}
+					}
+				}					
+			}
+		}		
+		
+		return $reducedPossibilities;
+	}
+	
+	
 	public function solve(Grid $grid, $puzzle)
 	{
 		$this->_grid = $grid;
@@ -31,120 +159,20 @@ class Solver
 		
 		while (!$this->_isFinished()) {
 			
-			// If something can only be one thing, it must be that.
-			foreach ($this->_possibilities as $cellName => $possibilities) {
-				if (sizeof($possibilities) == 1) {
-					$this->_assignValue($cellName, array_shift($possibilities));
-					continue 2;
-				}
-			}			
-			
-			// Each row, column and shape must have one of each thing.
-			foreach ($this->_possibilities as $cellName => $possibilities) {
-				$onlyInRow = $possibilities;
-				$onlyInCol = $possibilities;
-				$onlyInShape = $possibilities;
-				
-				foreach ($this->_possibilities as $otherCellName => $otherPossibilities) {
-					if ($cellName == $otherCellName) {
-						continue;
-					}
-					
-					if ($this->_isSameRow($cellName, $otherCellName)) {
-						$onlyInRow = array_diff($onlyInRow, $otherPossibilities);
-					}
-					if ($this->_isSameColumn($cellName, $otherCellName)) {
-						$onlyInCol = array_diff($onlyInCol, $otherPossibilities);
-					}
-					if ($this->_isSameShape($cellName, $otherCellName)) {
-						$onlyInShape = array_diff($onlyInShape, $otherPossibilities);
-					}
-					
-				}					
-
-				if (sizeof($onlyInRow) == 1) {
-					$this->_assignValue($cellName, array_shift($onlyInRow));
-					continue 2;
-				}
-				if (sizeof($onlyInCol) == 1) {
-					$this->_assignValue($cellName, array_shift($onlyInCol));
-					continue 2;
-				}
-				if (sizeof($onlyInShape) == 1) {
-					$this->_assignValue($cellName, array_shift($onlyInShape));
-					continue 2;
-				}								
-
-			}				
-			
-			// If a value only appears in one row or column in a shape,
-			// other shapes can't have it
-			foreach ($this->_grid->getShapes() as $shapeCellNames) {
-				foreach ($this->_puzzle as $value) {
-					$inRows = array();
-					$inCols = array();
-					
-					foreach ($shapeCellNames as $shapeCell) {
-						if (!in_array($value, $this->_possibilities[$shapeCell])) {
-							continue;
-						}
-						
-						$inRows[] = substr($shapeCell, 1, 1);
-						$inCols[] = substr($shapeCell, 0, 1);
-					
-						$inRows = array_unique($inRows);
-						$inCols = array_unique($inCols);
-						
-						if (sizeof($inCols) > 1 && sizeof($inRows) > 1) {
-							continue 2;
-						}								
-					}
-
-					if (sizeof($inCols) == 1) {
-						$col = array_shift($inCols);
-						// Remove from non-shape in column
-						foreach ($shapeCellNames as $shapeCell) {
-							if (substr($shapeCell, 0, 1) == $col) {
-								break;
-							}
-						}
-						
-						foreach ($this->_possibilities as $cellName => $possibilities) {
-							if ($cellName == $shapeCell) {
-								continue;
-							}								
-							if ($this->_isSameColumn($shapeCell, $cellName)
-								&& !$this->_isSameShape($shapeCell, $cellName)
-							) {
-								$this->_removePossibilityFromCell($cellName, $value);								
-							}
-						}
-					}
-					
-					if (sizeof($inRows) == 1) {
-						$row = array_shift($inRows);
-						// Remove from non-shape in column
-						foreach ($shapeCellNames as $shapeCell) {
-							if (substr($shapeCell, 1, 1) == $row) {
-								break;
-							}
-						}
-						
-						foreach ($this->_possibilities as $cellName => $possibilities) {
-							if ($cellName == $shapeCell) {
-								continue;
-							}								
-							if ($this->_isSameRow($shapeCell, $cellName)
-								&& !$this->_isSameShape($shapeCell, $cellName)
-							) {				
-								$this->_removePossibilityFromCell($cellName, $value);								
-							}
-						}
-					}
-					
-				}
+			if ($this->_assignCellsWithOnlyOnePossibility()) {
+				continue;
 			}
-			//break;
+		
+			if ($this->_assignCellsWhereOnlyOneInGroupHasAPossiblity()) {
+				continue;	
+			}
+			
+			if ($this->_reducePossibilitiesWhereOneValueAppearsInOneRowOrColumnInAShape()) {
+				continue;
+			}
+
+			// If nothing above was a match, this puzzle is unsolveable.
+			break;
 		}
 	}
 	
