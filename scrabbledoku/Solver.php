@@ -1,9 +1,57 @@
 <?php
 
 class Solver
-{
+{	
+	/**
+	 * @var Grid
+	 */
+	private $_grid;
 	
-	private function _assignCellsWithOnlyOnePossibility()
+	/**
+	 * @var array
+	 */
+	private $_puzzle;
+	
+	/**
+	 * @var array
+	 */
+	private $_possibilities;
+	
+	/**
+	 * @param Grid $grid
+	 * @param string $puzzle
+	 * @return Grid
+	 */
+	public function solve(Grid $grid, $puzzle)
+	{
+		$this->_grid = $grid;
+		$this->_puzzle = str_split($puzzle);				
+		$this->_possibilities = $this->_generatePossibilities();
+		
+		$this->_reducePossibilitiesForValuesAppearingInHint();		
+		
+		while ($this->_possibilitiesRemain()) {
+			
+			if ($this->_canAssignCellsWithOnlyOnePossibility()) {
+				continue;
+			}
+		
+			if ($this->_canAssignCellsWhereOnlyOneInGroupHasAPossiblity()) {
+				continue;	
+			}
+			
+			if ($this->_canReducePossibilitiesWhereOneValueAppearsInOneRowOrColumnInAShape()) {
+				continue;
+			}
+
+			// If nothing above was a match, this puzzle is unsolveable.
+			throw new UnsolvablePuzzleException();
+		}
+		
+		return $this->_grid;
+	}	
+	
+	private function _canAssignCellsWithOnlyOnePossibility()
 	{
 		foreach ($this->_possibilities as $cellName => $possibilities) {
 			if (sizeof($possibilities) == 1) {
@@ -15,7 +63,7 @@ class Solver
 		return false;
 	}
 	
-	private function _assignCellsWhereOnlyOneInGroupHasAPossiblity()
+	private function _canAssignCellsWhereOnlyOneInGroupHasAPossiblity()
 	{
 		foreach ($this->_possibilities as $cellName => $possibilities) {
 			$onlyInRow = $possibilities;
@@ -56,7 +104,7 @@ class Solver
 		return false;
 	}		
 	
-	public function _reducePossibilitiesWhereOneValueAppearsInOneRowOrColumnInAShape()
+	public function _canReducePossibilitiesWhereOneValueAppearsInOneRowOrColumnInAShape()
 	{
 		$reducedPossibilities = false;
 		
@@ -70,8 +118,8 @@ class Solver
 						continue;
 					}
 					
-					$inRows[] = substr($shapeCell, 1, 1);
-					$inCols[] = substr($shapeCell, 0, 1);
+					$inRows[] = $this->_getRowFromCellName($shapeCell);
+					$inCols[] = $this->_getColumnFromCellName($shapeCell);
 				
 					$inRows = array_unique($inRows);
 					$inCols = array_unique($inCols);
@@ -85,7 +133,7 @@ class Solver
 					$col = array_shift($inCols);
 					// Remove from non-shape in column
 					foreach ($shapeCellNames as $shapeCell) {
-						if (substr($shapeCell, 0, 1) == $col) {
+						if ($this->_getColumnFromCellName($shapeCell) == $col) {
 							break;
 						}
 					}
@@ -109,7 +157,7 @@ class Solver
 					$row = array_shift($inRows);
 					// Remove from non-shape in column
 					foreach ($shapeCellNames as $shapeCell) {
-						if (substr($shapeCell, 1, 1) == $row) {
+						if ($this->_getRowFromCellName($shapeCell) == $row) {
 							break;
 						}
 					}
@@ -133,22 +181,24 @@ class Solver
 		return $reducedPossibilities;
 	}
 	
-	
-	public function solve(Grid $grid, $puzzle)
+	private function _generatePossibilities()
 	{
-		$this->_grid = $grid;
-		$this->_puzzle = str_split($puzzle);
-		
-		$this->_possibilities = array();
+		$possibilities = array();
 		
 		$rows = $this->_grid->getCells();
 		foreach ($rows as $row => $cells){
 			foreach ($cells as $col => $cell) {
 				$cellName = $this->_getCellName($row, $col);
-				$this->_possibilities[$cellName] = $this->_puzzle;
+				$possibilities[$cellName] = $this->_puzzle;
 			}			
 		}
 		
+		return $possibilities;
+	}
+	
+	private function _reducePossibilitiesForValuesAppearingInHint()
+	{
+		$rows = $this->_grid->getCells();
 		foreach ($rows as $row => $cells){
 			foreach ($cells as $col => $cell) {
 				$cellName = $this->_getCellName($row, $col);
@@ -158,36 +208,18 @@ class Solver
 				}
 				$this->_assignValue($cellName, $value);
 			}			
-		}
-		
-		while (!$this->_isFinished()) {
-			
-			if ($this->_assignCellsWithOnlyOnePossibility()) {
-				continue;
-			}
-		
-			if ($this->_assignCellsWhereOnlyOneInGroupHasAPossiblity()) {
-				continue;	
-			}
-			
-			if ($this->_reducePossibilitiesWhereOneValueAppearsInOneRowOrColumnInAShape()) {
-				continue;
-			}
-
-			// If nothing above was a match, this puzzle is unsolveable.
-			throw new UnsolvablePuzzleException();
-		}
-	}
+		}		
+	}	
 	
-	private function _isFinished()
+	private function _possibilitiesRemain()
 	{		
 		foreach ($this->_possibilities as $possibilities) {
 			if (sizeof($possibilities)) {
-				return false;
+				return true;
 			}
 		}
 		
-		return true;
+		return false;
 	}
 	
 	private function _removePossibilityFromCell($cellName, $value)
@@ -222,14 +254,24 @@ class Solver
 		}
 	}
 	
+	private function _getRowFromCellName($cellName)
+	{
+		return substr($cellName, 1, 1);
+	}
+	
+	private function _getColumnFromCellName($cellName)
+	{
+		return substr($cellName, 0, 1);
+	}	
+	
 	private function _isSameRow($assignedCellName, $cellName)
 	{
-		return substr($assignedCellName, 1, 1) == substr($cellName, 1, 1);
+		return $this->_getRowFromCellName($assignedCellName) ==  $this->_getRowFromCellName($cellName);
 	}
 	
 	private function _isSameColumn($assignedCellName, $cellName)
 	{
-		return substr($assignedCellName, 0, 1) == substr($cellName, 0, 1);
+		return $this->_getColumnFromCellName($assignedCellName) ==  $this->_getColumnFromCellName($cellName);
 	}	
 	
 	private function _isSameShape($assignedCellName, $cellName)
@@ -237,12 +279,7 @@ class Solver
 		$shapeCells = $this->_grid->getShapeForCell($assignedCellName);
 		return in_array($cellName, $shapeCells);
 	}		
-	
-	public function getGrid()
-	{
-		return $this->_grid;
-	}
-	
+
 	private function _getCellName($row, $col)
 	{
 		$cellName = $this->_translateColumnToLetter($col);
@@ -256,12 +293,5 @@ class Solver
 	{
 		$letters = range('A', 'Z');
 		return $letters[$col];
-	}
-	
-	private function _setValueForLocation($row, $col, $value)
-	{
-
-		return $this->_setValueForCell($cellName, $value);	
-	}
-	
+	}	
 }

@@ -2,13 +2,20 @@
 
 class SolverTest extends PHPUnit_Framework_TestCase
 {
-
 	/**
 	 * @var Grid
 	 */
 	private $_grid;
 
+	/**
+	 * @var Solver
+	 */
 	private $_solver;
+
+	/**
+	 * @var Grid
+	 */
+	private $_solution;
 
 	public function setUp()
 	{
@@ -19,6 +26,7 @@ class SolverTest extends PHPUnit_Framework_TestCase
 	{
 		unset($this->_solver);
 		unset($this->_grid);
+		unset($this->_solution);
 	}
 
 	public function testAcceptancePuzzle49()
@@ -156,12 +164,12 @@ class SolverTest extends PHPUnit_Framework_TestCase
 	
 	private function _whenSolvingFor($puzzle)
 	{
-		$this->_solver->solve($this->_grid, $puzzle);
+		$this->_solution = $this->_solver->solve($this->_grid, $puzzle);
 	}
 	
 	private function _theSolutionIs($expectedCells)
 	{
-		$this->assertEquals($expectedCells, $this->_solver->getGrid()->getCells());
+		$this->assertEquals($expectedCells, $this->_solution->getCells());
 	}
 	
 }	
