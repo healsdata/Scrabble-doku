@@ -35,6 +35,11 @@ class Grid
 		return $this->_cells;		
 	}
 	
+	public function getShapes()
+	{
+		return $this->_shapes;
+	}
+	
 	/**
 	 * @param string $cellName
 	 * @return integer
