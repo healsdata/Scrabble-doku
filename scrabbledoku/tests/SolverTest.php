@@ -46,6 +46,14 @@ class SolverTest extends PHPUnit_Framework_TestCase
 		));		
 	}	
 	
+	public function testAcceptanceUnsolvable()
+	{
+		$this->_givenAScrabbledokuGrid();
+		$this->_andTooFewHints();
+		$this->_thenExpectAnException();
+		$this->_whenSolvingFor('SHOEPAC');
+	}	
+	
 	public function testAcceptanceSudokuExample()
 	{
 		$this->_givenASudokuGrid();
@@ -100,6 +108,20 @@ class SolverTest extends PHPUnit_Framework_TestCase
 			str_split(562879134),
 		));		
 	}		
+	
+	private function _andTooFewHints()
+	{
+		$this->_andAHintOf('F1', 'H');
+		$this->_andAHintOf('G1', 'P');		
+		$this->_andAHintOf('A2', 'P');
+		$this->_andAHintOf('C3', 'P');
+		$this->_andAHintOf('F3', 'A');		
+	}
+	
+	private function _thenExpectAnException()
+	{
+		$this->setExpectedException('UnsolvablePuzzleException');
+	}	
 
 	private function _givenAScrabbledokuGrid()
 	{

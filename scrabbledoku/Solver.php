@@ -97,8 +97,10 @@ class Solver
 						if ($this->_isSameColumn($shapeCell, $cellName)
 							&& !$this->_isSameShape($shapeCell, $cellName)
 						) {
-							$this->_removePossibilityFromCell($cellName, $value);		
-							$reducedPossibilities = true;						
+							if ($this->_removePossibilityFromCell($cellName, $value)) {
+								$reducedPossibilities = true;	
+							}		
+													
 						}
 					}
 				}
@@ -119,8 +121,9 @@ class Solver
 						if ($this->_isSameRow($shapeCell, $cellName)
 							&& !$this->_isSameShape($shapeCell, $cellName)
 						) {				
-							$this->_removePossibilityFromCell($cellName, $value);
-							$reducedPossibilities = true;								
+							if ($this->_removePossibilityFromCell($cellName, $value)) {
+								$reducedPossibilities = true;								
+							}
 						}
 					}
 				}					
@@ -172,7 +175,7 @@ class Solver
 			}
 
 			// If nothing above was a match, this puzzle is unsolveable.
-			break;
+			throw new UnsolvablePuzzleException();
 		}
 	}
 	
@@ -188,10 +191,15 @@ class Solver
 	}
 	
 	private function _removePossibilityFromCell($cellName, $value)
-	{	
+	{		
 		$possibilities = $this->_possibilities[$cellName];
+		if (!in_array($value, $possibilities)) {
+			return false;
+		}
+		
 		$remove = array($value);
-		$this->_possibilities[$cellName] = array_diff($possibilities, $remove);		
+		$this->_possibilities[$cellName] = array_diff($possibilities, $remove);
+		return true;		
 	}
 	
 	
