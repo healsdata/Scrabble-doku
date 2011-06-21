@@ -31,4 +31,13 @@ class CellTest extends PHPUnit_Framework_TestCase
 		$Cell = new Cell(5, $expectedRow);
 		$this->assertEquals($expectedRow, $Cell->getYCoordinate());
 	}	
+	
+	public function testReturnsCorrectName()
+	{
+		$this->assertEquals(
+			'B4',
+			Cell::factoryFromCoordinates(1, 3)->getName()
+		);
+	}
+	
 }

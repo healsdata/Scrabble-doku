@@ -131,7 +131,6 @@ class Solver
 
 				if (sizeof($inCols) == 1) {
 					$col = array_shift($inCols);
-					// Remove from non-shape in column
 					foreach ($shapeCellNames as $shapeCell) {
 						if ($this->_getColumnFromCellName($shapeCell) == $col) {
 							break;
@@ -155,7 +154,6 @@ class Solver
 				
 				if (sizeof($inRows) == 1) {
 					$row = array_shift($inRows);
-					// Remove from non-shape in column
 					foreach ($shapeCellNames as $shapeCell) {
 						if ($this->_getRowFromCellName($shapeCell) == $row) {
 							break;
@@ -188,7 +186,7 @@ class Solver
 		$rows = $this->_grid->getCells();
 		foreach ($rows as $row => $cells){
 			foreach ($cells as $col => $cell) {
-				$cellName = $this->_getCellName($row, $col);
+				$cellName = Cell::factoryFromCoordinates($col, $row)->getName();
 				$possibilities[$cellName] = $this->_puzzle;
 			}			
 		}
@@ -201,7 +199,7 @@ class Solver
 		$rows = $this->_grid->getCells();
 		foreach ($rows as $row => $cells){
 			foreach ($cells as $col => $cell) {
-				$cellName = $this->_getCellName($row, $col);
+				$cellName = Cell::factoryFromCoordinates($col, $row)->getName();
 				$value = $this->_grid->getValue($cellName);
 				if (!$value) {
 					continue;
@@ -256,12 +254,12 @@ class Solver
 	
 	private function _getRowFromCellName($cellName)
 	{
-		return substr($cellName, 1, 1);
+		return Cell::factoryFromName($cellName)->getYCoordinate();
 	}
 	
 	private function _getColumnFromCellName($cellName)
 	{
-		return substr($cellName, 0, 1);
+		return Cell::factoryFromName($cellName)->getXCoordinate();
 	}	
 	
 	private function _isSameRow($assignedCellName, $cellName)
@@ -279,19 +277,4 @@ class Solver
 		$shapeCells = $this->_grid->getShapeForCell($assignedCellName);
 		return in_array($cellName, $shapeCells);
 	}		
-
-	private function _getCellName($row, $col)
-	{
-		$cellName = $this->_translateColumnToLetter($col);
-		$row++;
-		$cellName .= $row;
-		return $cellName;		
-	}
-	
-	
-	private function _translateColumnToLetter($col)
-	{
-		$letters = range('A', 'Z');
-		return $letters[$col];
-	}	
 }
