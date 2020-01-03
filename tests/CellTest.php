@@ -1,6 +1,11 @@
 <?php
 
-class CellTest extends PHPUnit_Framework_TestCase
+namespace Healsdata\ScrabbleDoku\Test;
+
+use PHPUnit\Framework\TestCase;
+use Healsdata\ScrabbleDoku\Cell;
+
+class CellTest extends TestCase
 {
 	public function testFactoryFromCoordinatesCreatesCorrectInstance()
 	{

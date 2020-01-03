@@ -1,6 +1,11 @@
 <?php
 
-class GridTest extends PHPUnit_Framework_TestCase
+namespace Healsdata\ScrabbleDoku\Test;
+
+use PHPUnit\Framework\TestCase;
+use Healsdata\ScrabbleDoku\Grid;
+
+class GridTest extends TestCase
 {
 	private function _givenAGridForXCharacters($numberOfCharacters)
 	{
@@ -13,7 +18,7 @@ class GridTest extends PHPUnit_Framework_TestCase
 		
 		$grid = $this->_givenAGridForXCharacters($numberOfCharacters);
 		$rows = $grid->getCells();
-		$this->assertType('array', $rows);
+		$this->assertIsArray($rows);
 		$this->assertEquals($numberOfCharacters, sizeof($rows));
 		
 		foreach ($rows as $row) {

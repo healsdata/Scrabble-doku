@@ -1,6 +1,13 @@
 <?php
 
-class SolverTest extends PHPUnit_Framework_TestCase
+namespace Healsdata\ScrabbleDoku\Test;
+
+use PHPUnit\Framework\TestCase;
+use Healsdata\ScrabbleDoku\Solver;
+use Healsdata\ScrabbleDoku\Grid;
+use Healsdata\ScrabbleDoku\UnsolvablePuzzleException;
+
+class SolverTest extends TestCase
 {
 	/**
 	 * @var Grid
@@ -17,12 +24,12 @@ class SolverTest extends PHPUnit_Framework_TestCase
 	 */
 	private $_solution;
 
-	public function setUp()
+	public function setUp() : void
 	{
 		$this->_solver = new Solver();
 	}
 
-	public function tearDown()
+	public function tearDown() : void
 	{
 		unset($this->_solver);
 		unset($this->_grid);
@@ -128,7 +135,7 @@ class SolverTest extends PHPUnit_Framework_TestCase
 	
 	private function _thenExpectAnException()
 	{
-		$this->setExpectedException('UnsolvablePuzzleException');
+		$this->expectException(UnsolvablePuzzleException::class);
 	}	
 
 	private function _givenAScrabbledokuGrid()

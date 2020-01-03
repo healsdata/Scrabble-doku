@@ -1,0 +1,19 @@
+{
+    "name": "healsdata/scrabble-doku",
+    "type": "project",
+    "license": "MIT",    
+    "require": {},    
+    "require-dev": {
+        "phpunit/phpunit": "^8.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Healsdata\\ScrabbleDoku\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Healsdata\\ScrabbleDoku\\Test\\": "tests/"
+        }
+    }
+}
